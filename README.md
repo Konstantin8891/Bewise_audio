@@ -2,11 +2,37 @@
 
 Сервис для конвертации и хранения mp3 в wav 
 
+## Пререквизиты
+
+На компьютере должен быть установлен Docker
+
+## Стек
+
+FastAPI
+
+PostgreSQL
+
+pydub
+
 ## Запуск проекта
 
 git clone git@github.com:Konstantin8891/Bewise_audio.git
 
 cd Bewise_audio
+
+cd backend
+
+nano .env
+
+содержание .env файла:
+
+POSTGRES_DB=postgres
+
+POSTGRES_USER=postgres
+
+POSTGRES_PASSWORD=postgres
+
+HOST=db
 
 cd infra_audio
 
