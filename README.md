@@ -34,6 +34,8 @@ POSTGRES_PASSWORD=postgres
 
 HOST=db
 
+cd ..
+
 cd infra_audio
 
 docker-compose up --build -d
