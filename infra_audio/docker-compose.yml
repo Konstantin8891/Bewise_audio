@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    env_file:
+      - ../backend/.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data_bewise_audio/
+  backend:
+    build: 
+      context: ../
+      dockerfile: ./backend/Dockerfile
+    # command: bash -c 'sudo apt-get install ffmpeg libavcodec-extra'
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - db
+volumes:
+  postgres_data:
