@@ -10,7 +10,6 @@ services:
     build: 
       context: ../
       dockerfile: ./backend/Dockerfile
-    # command: bash -c 'sudo apt-get install ffmpeg libavcodec-extra'
     ports:
       - "8000:8000"
     restart: always
@@ -18,3 +17,4 @@ services:
       - db
 volumes:
   postgres_data:
+  
