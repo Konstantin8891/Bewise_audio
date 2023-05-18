@@ -49,9 +49,14 @@ async def create_audio(
             break
 
     file_location_mp3 = RECORDS_DIR + '/' + filename_mp3
-    AudioSegment.from_wav(file_location_wav).export(
-        file_location_mp3, format="mp3"
-    )
+    try:
+        AudioSegment.from_wav(file_location_wav).export(
+            file_location_mp3, format="mp3"
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=400, detail='Something wrong with your audio file'
+        )
     os.remove(file_location_wav)
 
     audio_instance = Audio(
