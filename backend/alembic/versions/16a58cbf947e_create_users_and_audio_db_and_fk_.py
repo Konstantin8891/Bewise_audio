@@ -1,7 +1,7 @@
 """create users and audio db and fk constraint
 
 Revision ID: 16a58cbf947e
-Revises: 
+Revises:
 Create Date: 2023-05-17 12:49:13.507297
 
 """

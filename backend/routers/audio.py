@@ -7,14 +7,11 @@ from typing import BinaryIO
 from fastapi import APIRouter, status, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from pydub import AudioSegment
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext import asyncio as sea
 from uuid import UUID
 
-from .users import get_db
-
-import sys
-sys.path.append('..')
-
+from database import get_async_session
 from models import Audio, User
 from settings import RECORDS_DIR
 
@@ -24,11 +21,15 @@ router = APIRouter(prefix='', tags=['audio_router'])
 
 @router.post('/create_audio', status_code=status.HTTP_201_CREATED)
 async def create_audio(
-    user_id: int, uuid: UUID, audio: UploadFile, db: Session = Depends(get_db)
+    user_id: int,
+    uuid: UUID,
+    audio: UploadFile,
+    db: sea.AsyncSession = Depends(get_async_session)
 ) -> str:
-    user_instance = db.query(User).filter(
-        User.id == user_id
-    ).filter(User.uuid == uuid).first()
+    user_instance = await db.execute(select(User).where(
+        User.uuid == uuid
+    ))
+    user_instance = user_instance.scalar_one_or_none()
     if not user_instance:
         raise HTTPException(status_code=400, detail='User or token not found')
 
@@ -64,19 +65,23 @@ async def create_audio(
         user_id=user_id
     )
     db.add(audio_instance)
-    db.commit()
-    db.refresh(audio_instance)
-    return f'http://localhost:8000/record?id={audio_instance.id}&user={user_id}'
+    await db.commit()
+    await db.refresh(audio_instance)
+    return (
+        f'http://localhost:8000/record?id={audio_instance.id}&user={user_id}'
+    )
 
 
 @router.get('/record', response_model=None)
 async def get_audio(
-    id: UUID, user: int, db: Session = Depends(get_db)
+    id: UUID, user: int, db: sea.AsyncSession = Depends(get_async_session)
 ) -> BinaryIO:
-    user_instance = db.query(User).filter(User.id == user).first()
+    user_instance = await db.execute(select(User).where(User.id == user))
+    user_instance = user_instance.scalar_one_or_none()
     if not user_instance:
         raise HTTPException(status_code=400, detail='User not found')
-    audio_instance = db.query(Audio).filter(Audio.id == id).first()
+    audio_instance = await db.execute(select(Audio).where(Audio.id == id))
+    audio_instance = audio_instance.scalar_one_or_none()
     if not audio_instance:
         raise HTTPException(status_code=400, detail='Audio file not found')
     file_location_mp3 = RECORDS_DIR + '/' + audio_instance.name
